@@ -48,9 +48,11 @@ func getRouteGroup() [2]RouteGroup {
 			},
 		},
 		{
-			group:      "/api",
+			group:      "/api/",
 			middleware: nil,
-			endpoints:  []endpoint{},
+			endpoints: []endpoint{
+				{path: "/users/signup/", method: "POST", handler: controllers.UserController.Signup},
+			},
 		},
 	}
 

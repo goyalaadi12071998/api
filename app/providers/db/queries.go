@@ -12,7 +12,7 @@ type Repo struct {
 	db *gorm.DB
 }
 
-func NewRepo(db *gorm.DB) IRepo {
+func InitializeRepo(db *gorm.DB) IRepo {
 	repo = Repo{
 		db: db,
 	}

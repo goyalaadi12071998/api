@@ -29,7 +29,7 @@ type Error struct {
 	Message string
 }
 
-func NewAppController() {
+func InitializeAppController() {
 	AppController = appcontroller{}
 }
 

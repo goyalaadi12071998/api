@@ -6,6 +6,7 @@ import (
 	"interview/app/controllers"
 	"interview/app/providers/db"
 	"interview/app/router"
+	"interview/app/users"
 )
 
 func initMySqlClient() error {
@@ -41,7 +42,14 @@ func initRoutes() error {
 }
 
 func initControllers() error {
-	controllers.NewAppController()
+	database := db.GetDb()
+	repo := db.InitializeRepo(database)
+
+	usercore := users.InitializeUserCore(repo)
+	userservice := users.InitializeUserService(usercore)
+
+	controllers.InitializeAppController()
+	controllers.InitializeUserController(userservice)
 
 	return nil
 }
