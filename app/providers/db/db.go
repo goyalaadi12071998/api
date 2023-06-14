@@ -2,6 +2,8 @@ package db
 
 import (
 	"fmt"
+	"interview/cmd/migrations"
+	"log"
 	"strconv"
 
 	"gorm.io/driver/mysql"
@@ -40,6 +42,14 @@ func connectDB(config Config) (*gorm.DB, error) {
 	}
 
 	fmt.Println("Db connection successful")
+
+	res := db.Exec(migrations.CREATE_USER_MODEL)
+	if res.Error != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("USER table initialize successfully")
+
 	return db, nil
 }
 
