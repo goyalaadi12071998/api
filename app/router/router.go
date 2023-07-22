@@ -41,17 +41,17 @@ func getRouteGroup() [2]RouteGroup {
 	routeGroup := [2]RouteGroup{
 		{
 			group:      "/",
-			middleware: nil,
+			middleware: []mux.MiddlewareFunc{middlewares.LoggingMiddleware},
 			endpoints: []endpoint{
 				{path: "/", method: "GET", handler: controllers.AppController.Get},
 				{path: "/health", method: "GET", handler: controllers.AppController.Health},
 			},
 		},
 		{
-			group:      "/api/",
+			group:      "/api",
 			middleware: nil,
 			endpoints: []endpoint{
-				{path: "/users/signup/", method: "POST", handler: controllers.UserController.Signup},
+				{path: "/users/signup", method: "POST", handler: controllers.UserController.Signup},
 			},
 		},
 	}

@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
-
 	"interview/app/boot"
 	"interview/app/common"
+	"log"
 )
 
 func main() {

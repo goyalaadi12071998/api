@@ -46,7 +46,7 @@ func (a appcontroller) Health(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a appcontroller) Get(w http.ResponseWriter, r *http.Request) {
-	Respond(w, r, "Welcome to Bitespeed", nil)
+	Respond(w, r, "Welcome to Server", nil)
 }
 
 func (a appcontroller) NotFoundHandler(w http.ResponseWriter, r *http.Request) {

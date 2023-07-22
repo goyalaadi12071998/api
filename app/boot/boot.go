@@ -5,6 +5,7 @@ import (
 	"interview/app/common"
 	"interview/app/controllers"
 	"interview/app/providers/db"
+	redisclient "interview/app/providers/redis"
 	"interview/app/router"
 	"interview/app/users"
 )
@@ -22,8 +23,23 @@ func initMySqlClient() error {
 	return err
 }
 
-func initProviders() error {
+func initRedisClient(ctx context.Context) error {
+	config := common.GetConfig().Redis
+	err := redisclient.InitRedisClient(ctx, redisclient.Config{
+		Host: config.Host,
+		Port: config.Port,
+	})
+
+	return err
+}
+
+func initProviders(ctx context.Context) error {
 	err := initMySqlClient()
+	if err != nil {
+		return err
+	}
+
+	err = initRedisClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -60,7 +76,7 @@ func Init(ctx context.Context, env string) error {
 		return err
 	}
 
-	err = initProviders()
+	err = initProviders(ctx)
 	if err != nil {
 		return err
 	}

@@ -28,15 +28,6 @@ func (d Repo) Create(model any) error {
 	return nil
 }
 
-func (d Repo) Get(model any, filter map[string]interface{}) (any, error) {
-	err := d.db.Where(filter).Find(&model).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return model, nil
-}
-
 func (d Repo) FindOne(model any, filter map[string]interface{}) error {
 	err := d.db.Where(filter).First(&model).Error
 	if err != nil {

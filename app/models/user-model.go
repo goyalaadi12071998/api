@@ -1,16 +1,18 @@
 package models
 
 type User struct {
-	Id                  int `gorm:"primary_key;auto_increment"`
+	ID                  int `gorm:"primaryKey"`
 	Name                string
 	Email               string
-	PhoneNumber         string
 	Hash                string
 	Salt                string
+	PhoneNumber         string
+	Admin               bool
+	Type                string
 	CountryCode         string
 	EmailVerified       bool
 	PhoneNumberVerified bool
 	ActiveAccount       bool
-	CreatedAt           string `gorm:"autoCreateTime:milli"`
-	UpdatedAt           string `gorm:"autoCreateTime:milli"`
+	CreatedAt           int64 `gorm:"autoCreateTime:milli"`
+	UpdatedAt           int   `gorm:"autoUpdateTime:milli"`
 }

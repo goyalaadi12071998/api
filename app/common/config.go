@@ -26,6 +26,12 @@ type Options struct {
 type Config struct {
 	Core     Core
 	Database Database
+	Redis    Redis
+}
+
+type Redis struct {
+	Host string
+	Port int
 }
 
 type Core struct {
