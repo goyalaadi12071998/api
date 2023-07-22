@@ -1,9 +1,13 @@
 package tokenservice
 
 import (
+	"context"
+	"encoding/json"
+	redisclient "interview/app/providers/redis"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 )
 
 type userClaims struct {
@@ -11,12 +15,19 @@ type userClaims struct {
 	jwt.StandardClaims
 }
 
-type ITokensService interface {
-	NewAccessToken() (string, error)
-	NewRefreshToken() (string, error)
+type Token struct {
+	accessToken  string `json:"access_token"`
+	refreshToken string `json:"refresh_token"`
 }
 
-func (u userClaims) NewAccessToken(duration time.Duration) (string, error) {
+type ITokensService interface {
+	newAccessToken(duration time.Duration) (string, error)
+	newRefreshToken(duration time.Duration) (string, error)
+	generateToken() Token
+	GenerateTokenAndStoreInCache(ctx context.Context) (string, error)
+}
+
+func (u userClaims) newAccessToken(duration time.Duration) (string, error) {
 	u.StandardClaims = jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(duration).Unix(),
@@ -26,7 +37,7 @@ func (u userClaims) NewAccessToken(duration time.Duration) (string, error) {
 	return accessToken.SignedString([]byte("thisisasecret"))
 }
 
-func (u userClaims) NewRefreshToken(duration time.Duration) (string, error) {
+func (u userClaims) newRefreshToken(duration time.Duration) (string, error) {
 	u.StandardClaims = jwt.StandardClaims{
 		IssuedAt:  time.Now().Unix(),
 		ExpiresAt: time.Now().Add(duration).Unix(),
@@ -36,7 +47,40 @@ func (u userClaims) NewRefreshToken(duration time.Duration) (string, error) {
 	return refreshToken.SignedString([]byte("thisisasecret"))
 }
 
-func NewUserClaims(id int) userClaims {
+func (u userClaims) generateToken() Token {
+	accessToken, _ := u.newAccessToken(time.Duration(time.Minute * 60))
+	refreshToken, _ := u.newRefreshToken(time.Duration(time.Hour * 24))
+
+	return Token{
+		accessToken:  accessToken,
+		refreshToken: refreshToken,
+	}
+}
+
+func (u userClaims) GenerateTokenAndStoreInCache(ctx context.Context) (string, error) {
+	client := redisclient.GetClient()
+	token := u.generateToken()
+	cookie, err := uuid.NewRandom()
+
+	if err != nil {
+		return "", err
+	}
+
+	cookieId := cookie.String()
+	tokenData, err := json.Marshal(token)
+	if err != nil {
+		return "", err
+	}
+
+	err = client.Set(ctx, cookieId, tokenData, time.Duration(time.Minute*60))
+	if err != nil {
+		return "", err
+	}
+
+	return cookieId, nil
+}
+
+func NewUserClaims(id int) ITokensService {
 	return userClaims{
 		id: id,
 	}
