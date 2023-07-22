@@ -16,8 +16,8 @@ type userClaims struct {
 }
 
 type Token struct {
-	accessToken  string `json:"access_token"`
-	refreshToken string `json:"refresh_token"`
+	accessToken  string
+	refreshToken string
 }
 
 type ITokensService interface {
