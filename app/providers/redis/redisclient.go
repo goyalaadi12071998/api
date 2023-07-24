@@ -47,7 +47,7 @@ func getAddr(host string, port int) string {
 	return host + ":" + strconv.Itoa(port)
 }
 
-func GetClient() RedisClient {
+func GetClient() IRedisClient {
 	return RedisClient{
 		client:   redisclient,
 		pipeline: redisclientpipeline,

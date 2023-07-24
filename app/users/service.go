@@ -63,6 +63,49 @@ func (u userservice) Signup(ctx context.Context, data *structs.UserSingupRequest
 	}, nil
 }
 
+func (u userservice) Login(ctx context.Context, data *structs.UserLoginRequest) (*structs.UserLoginRequestResponse, *errorclass.Error) {
+	filter := map[string]interface{}{
+		"email": data.Email,
+	}
+
+	user, err := u.core.GetUser(ctx, filter)
+	if err != nil {
+		return nil, errorclass.NewError(errorclass.InternalServerError).Wrap("Error in fetching data")
+	}
+
+	if user == nil {
+		return nil, errorclass.NewError(errorclass.RecordNotFound).Wrap("user with this email does not exist")
+	}
+
+	isValidPassword := isValidPassword(user.Hash, data.Password, user.Salt)
+	if !isValidPassword {
+		return nil, errorclass.NewError(errorclass.BadRequestValidationError).Wrap("credentials does not match")
+	}
+
+	return &structs.UserLoginRequestResponse{
+		Id:                  user.ID,
+		Name:                user.Name,
+		Email:               user.Email,
+		PhoneNumber:         user.PhoneNumber,
+		EmailVerified:       user.EmailVerified,
+		PhoneNumberVerified: user.PhoneNumberVerified,
+		Type:                user.Type,
+		Admin:               user.Admin,
+		CountryCode:         user.CountryCode,
+		ActiveAccount:       user.ActiveAccount,
+		CreatedAt:           user.CreatedAt,
+		UpdatedAt:           user.UpdatedAt,
+	}, nil
+}
+
+func isValidPassword(hash string, password string, salt string) bool {
+	newHash := hashPassword(password, salt)
+	if newHash == hash {
+		return true
+	}
+	return false
+}
+
 func hashPassword(password string, salt string) string {
 	var passwordBytes = []byte(password)
 

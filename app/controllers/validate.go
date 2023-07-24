@@ -14,3 +14,12 @@ func validateSignUpRequestData(data structs.UserSingupRequest) error {
 
 	return err
 }
+
+func validateLoginRequestData(data structs.UserLoginRequest) error {
+	err := validation.ValidateStruct(&data,
+		validation.Field(&data.Email, validation.Required),
+		validation.Field(&data.Password, validation.Required, validation.Length(8, 15)),
+	)
+
+	return err
+}

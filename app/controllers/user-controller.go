@@ -44,6 +44,30 @@ func (u usercontroller) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	Respond(w, r, paylaod, nil)
+	return
+}
+
+func (u usercontroller) Login(w http.ResponseWriter, r *http.Request) {
+	loginData := new(structs.UserLoginRequest)
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(loginData)
+	if err != nil {
+		Respond(w, r, nil, errorclass.NewError(errorclass.BadRequestError).Wrap(err.Error()))
+	}
+
+	err = validateLoginRequestData(*loginData)
+	if err != nil {
+		Respond(w, r, nil, errorclass.NewError(errorclass.BadRequestValidationError).Wrap(err.Error()))
+		return
+	}
+
+	paylaod, errr := u.service.Login(r.Context(), loginData)
+	if errr != nil {
+		Respond(w, r, nil, errr)
+		return
+	}
+
 	generateTokenForUserAndStoreInCookie(w, paylaod.Id)
 
 	Respond(w, r, paylaod, nil)

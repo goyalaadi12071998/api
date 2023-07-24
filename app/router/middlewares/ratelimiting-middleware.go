@@ -34,7 +34,7 @@ func RateLimitingMiddleware(next http.Handler) http.Handler {
 func storeRequestIdForUser(ctx context.Context, requestId string, userId string) error {
 	key := getKeyForRateLimiting(userId)
 	client := redisclient.GetClient()
-	err := client.SetKeyWithExpiry(ctx, key, requestId, constants.TTL_FOR_RATE_LIMIT)
+	err := client.SetDataForRequestRateLimiting(ctx, key, requestId, constants.TTL_FOR_RATE_LIMIT)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func storeRequestIdForUser(ctx context.Context, requestId string, userId string)
 func getTotalRequestForUserIdInCurrentTimeFrame(ctx context.Context, userId string) error {
 	client := redisclient.GetClient()
 	key := getKeyForRateLimiting(userId)
-	totalRequest, err := client.GetToalRequestForUser(ctx, key)
+	totalRequest, err := client.GetTotalRequestCountForRateLimiting(ctx, key)
 	if err != nil {
 		return err
 	}

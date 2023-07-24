@@ -9,6 +9,7 @@ import (
 
 type IUserService interface {
 	Signup(ctx context.Context, data *structs.UserSingupRequest) (*structs.UserSingupRequestResponse, *errorclass.Error)
+	Login(ctx context.Context, data *structs.UserLoginRequest) (*structs.UserLoginRequestResponse, *errorclass.Error)
 }
 
 type IUserCore interface {
