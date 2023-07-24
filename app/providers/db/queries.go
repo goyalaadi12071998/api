@@ -36,12 +36,3 @@ func (d Repo) FindOne(model any, filter map[string]interface{}) error {
 
 	return nil
 }
-
-func (d Repo) Update(model any, filter map[string]interface{}, id int) error {
-	err := d.db.Model(&model).Where("id = ?", id).Updates(filter).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

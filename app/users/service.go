@@ -50,6 +50,7 @@ func (u userservice) Signup(ctx context.Context, data *structs.UserSingupRequest
 		Salt:          salt,
 		ActiveAccount: true,
 		CountryCode:   data.CountryCode,
+		Type:          data.Type,
 	}
 
 	response, err := u.core.CreateUser(ctx, user)

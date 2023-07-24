@@ -1,13 +1,13 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	errorclass "interview/app/error"
 	"interview/app/structs"
 	"interview/app/users"
 	tokenservice "interview/app/users/tokens"
 	"net/http"
+	"time"
 )
 
 var UserController usercontroller
@@ -43,28 +43,33 @@ func (u usercontroller) Signup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie, err := generateSessionForUser(r.Context(), paylaod.Id)
-	if err != nil {
-		Respond(w, r, paylaod, nil)
-	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session",
-		Value:    cookie,
-		Secure:   true,
-		HttpOnly: true,
-	})
+	generateTokenForUserAndStoreInCookie(w, paylaod.Id)
 
 	Respond(w, r, paylaod, nil)
 	return
 }
 
-func generateSessionForUser(ctx context.Context, userId int) (string, error) {
-	userClaims := tokenservice.NewUserClaims(userId)
-	cookieId, err := userClaims.GenerateTokenAndStoreInCache(ctx)
-	if err != nil {
-		return "", err
-	}
+func generateTokenForUserAndStoreInCookie(w http.ResponseWriter, userId int) {
+	tokens := generateTokenForUser(userId)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    tokens.AccessToken,
+		Secure:   true,
+		HttpOnly: true,
+		MaxAge:   int(time.Now().Add(time.Minute * 60).Unix()),
+	})
 
-	return cookieId, nil
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Secure:   true,
+		HttpOnly: true,
+		MaxAge:   int(time.Now().Add(time.Hour * 24).Unix()),
+	})
+}
+
+func generateTokenForUser(userId int) tokenservice.Token {
+	userClaims := tokenservice.NewUserClaims(userId)
+	tokens := userClaims.GenerateToken()
+	return tokens
 }
