@@ -37,11 +37,11 @@ type RouteGroup struct {
 	endpoints  []endpoint
 }
 
-func getRouteGroup() [2]RouteGroup {
-	routeGroup := [2]RouteGroup{
+func getRouteGroup() [3]RouteGroup {
+	routeGroup := [3]RouteGroup{
 		{
 			group:      "/",
-			middleware: []mux.MiddlewareFunc{middlewares.LoggingMiddleware},
+			middleware: nil,
 			endpoints: []endpoint{
 				{path: "/", method: "GET", handler: controllers.AppController.Get},
 				{path: "/health", method: "GET", handler: controllers.AppController.Health},
@@ -53,6 +53,11 @@ func getRouteGroup() [2]RouteGroup {
 			endpoints: []endpoint{
 				{path: "/users/signup", method: "POST", handler: controllers.UserController.Signup},
 			},
+		},
+		{
+			group:      "/api",
+			middleware: []mux.MiddlewareFunc{middlewares.RateLimitingMiddleware},
+			endpoints:  []endpoint{},
 		},
 	}
 
@@ -70,6 +75,7 @@ func InitializeRouter(configs CoreConfigs) error {
 
 func initializeRouter(router *mux.Router, configs CoreConfigs) error {
 	router.Use(middlewares.CorsMiddleware)
+	router.Use(middlewares.LoggingMiddleware)
 
 	c := cors.New(cors.Options{
 		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
