@@ -9,6 +9,7 @@ import (
 )
 
 var redisclient *redis.Client
+var redisclientpipeline redis.Pipeliner
 
 type Config struct {
 	Host string
@@ -16,7 +17,12 @@ type Config struct {
 }
 
 type RedisClient struct {
-	client *redis.Client
+	client   *redis.Client
+	pipeline redis.Pipeliner
+}
+
+type RedisClientPipeline struct {
+	clientPipeLine redis.Pipeliner
 }
 
 func InitRedisClient(ctx context.Context, config Config) error {
@@ -31,6 +37,8 @@ func InitRedisClient(ctx context.Context, config Config) error {
 		return err
 	}
 
+	redisclientpipeline = redisclient.Pipeline()
+
 	fmt.Println("Redis connected successfully")
 	return nil
 }
@@ -41,6 +49,7 @@ func getAddr(host string, port int) string {
 
 func GetClient() RedisClient {
 	return RedisClient{
-		client: redisclient,
+		client:   redisclient,
+		pipeline: redisclientpipeline,
 	}
 }

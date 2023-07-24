@@ -18,11 +18,22 @@ func (r RedisClient) Set(ctx context.Context, key string, val interface{}, expir
 	return nil
 }
 
-func (r RedisClient) Get(ctx context.Context, key string) (string, error) {
-	data := r.client.Get(ctx, key)
-	if data.Err() != nil {
-		return "", data.Err()
+func (p RedisClient) SetKeyWithExpiry(ctx context.Context, key string, val interface{}, expiration time.Duration) error {
+	p.pipeline.SAdd(ctx, key, val)
+	p.pipeline.Expire(ctx, key, expiration)
+	_, err := p.pipeline.Exec(ctx)
+	if err != nil {
+		return err
 	}
-	value := data.Val()
-	return value, nil
+
+	return nil
+}
+
+func (p RedisClient) GetToalRequestForUser(ctx context.Context, key string) (int, error) {
+	totalRequest, err := p.client.SCard(ctx, key).Result()
+	if err != nil {
+		return -1, err
+	}
+
+	return int(totalRequest), nil
 }

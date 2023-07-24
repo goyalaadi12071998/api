@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	errorclass "interview/app/error"
 	"interview/app/structs"
 	"interview/app/users"
@@ -51,6 +52,7 @@ func (u usercontroller) Signup(w http.ResponseWriter, r *http.Request) {
 
 func generateTokenForUserAndStoreInCookie(w http.ResponseWriter, userId int) {
 	tokens := generateTokenForUser(userId)
+	w.Header().Set("X-USER-ID", fmt.Sprint(userId))
 	http.SetCookie(w, &http.Cookie{
 		Name:     "access_token",
 		Value:    tokens.AccessToken,
