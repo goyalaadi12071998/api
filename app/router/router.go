@@ -53,11 +53,12 @@ func getRouteGroup() [3]RouteGroup {
 			endpoints: []endpoint{
 				{path: "/users/signup", method: "POST", handler: controllers.UserController.Signup},
 				{path: "/users/login", method: "POST", handler: controllers.UserController.Login},
+				{path: "/refresh-access-token", method: "POST", handler: controllers.UserController.RefreshToken},
 			},
 		},
 		{
 			group:      "/api",
-			middleware: []mux.MiddlewareFunc{middlewares.RateLimitingMiddleware},
+			middleware: []mux.MiddlewareFunc{middlewares.SessionMiddleware},
 			endpoints:  []endpoint{},
 		},
 	}

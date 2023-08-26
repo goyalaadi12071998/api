@@ -8,7 +8,6 @@ import (
 	"interview/app/users"
 	tokenservice "interview/app/users/tokens"
 	"net/http"
-	"time"
 )
 
 var UserController usercontroller
@@ -68,34 +67,37 @@ func (u usercontroller) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	generateTokenForUserAndStoreInCookie(w, paylaod.Id)
+	err = generateTokenForUserAndStoreInCache(w, paylaod.Id)
+	if err != nil {
+		Respond(w, r, nil, errorclass.NewError(errorclass.InternalServerError).Wrap(err.Error()))
+	}
 
 	Respond(w, r, paylaod, nil)
 	return
 }
 
-func generateTokenForUserAndStoreInCookie(w http.ResponseWriter, userId int) {
-	tokens := generateTokenForUser(userId)
-	w.Header().Set("X-USER-ID", fmt.Sprint(userId))
-	http.SetCookie(w, &http.Cookie{
-		Name:     "access_token",
-		Value:    tokens.AccessToken,
-		Secure:   true,
-		HttpOnly: true,
-		MaxAge:   int(time.Now().Add(time.Minute * 60).Unix()),
-	})
+func (u usercontroller) RefreshToken(w http.ResponseWriter, r *http.Request) {
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "refresh_token",
-		Value:    tokens.RefreshToken,
-		Secure:   true,
-		HttpOnly: true,
-		MaxAge:   int(time.Now().Add(time.Hour * 24).Unix()),
-	})
+}
+
+func generateTokenForUserAndStoreInCache(w http.ResponseWriter, userId int) error {
+	token := generateTokenForUser(userId)
+	err := setTokenInRedisCache(token)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("X-USER-ID", fmt.Sprint(userId))
+	w.Header().Set("X-ACCESS-TOKEN", token.AccessToken)
+	w.Header().Set("X-REFRESH-TOKEN", token.RefreshToken)
+	return nil
 }
 
 func generateTokenForUser(userId int) tokenservice.Token {
 	userClaims := tokenservice.NewUserClaims(userId)
 	tokens := userClaims.GenerateToken()
 	return tokens
+}
+
+func setTokenInRedisCache(token tokenservice.Token) error {
+	return nil
 }
